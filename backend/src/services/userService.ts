@@ -1,63 +1,32 @@
 import User from "../models/User";
 import Post from "../models/Post";
-import { Types } from "mongoose";
+import mongoose from "mongoose";
 
 export const getUserProfile = async (userId: string) => {
-  const user = await User.findById(userId);
+  // Ensure userId is ObjectId
+  const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  if (!user) throw new Error("User not found");
+  // Fetch user
+  const user = await User.findById(userId).lean();
+  if (!user) return null;
 
-  // Count of posts by the user
-  const postCount = await Post.countDocuments({ user: userId });
+  // Count posts
+  const postCount = await Post.countDocuments({ user: userObjectId });
 
-  // Total likes received by user's posts
-  const reactionCountResult = await Post.aggregate([
-    { $match: { user: new Types.ObjectId(userId) } },
-    {
-      $group: {
-        _id: null,
-        totalLikes: {
-          $sum: {
-            $size: {
-              $ifNull: [
-                { $cond: [{ $isArray: "$likes" }, "$likes", []] },
-                []
-              ]
-            }
-          }
-        }
-      }
-    }
-  ]);
+  // Count total likes (reactions) across all posts
+  const posts = await Post.find({ user: userObjectId }).select("likes comments").lean();
+  const reactionCount = posts.reduce((acc, post) => acc + (post.likes?.length || 0), 0);
+  const commentCount = posts.reduce((acc, post) => acc + (post.comments?.length || 0), 0);
 
-  // Total comments on user's posts
-  const commentCountResult = await Post.aggregate([
-    { $match: { user: new Types.ObjectId(userId) } },
-    {
-      $group: {
-        _id: null,
-        totalComments: {
-          $sum: {
-            $size: {
-              $ifNull: [
-                { $cond: [{ $isArray: "$comments" }, "$comments", []] },
-                []
-              ]
-            }
-          }
-        }
-      }
-    }
-  ]);
-
+  // Return formatted user profile
   return {
     id: user._id,
     name: user.name,
     createdAt: user.createdAt,
     email: user.email,
     profilePic: user.profilePic,
-    postCount: postCount || 0,
-    reactionCount: reactionCountResult[0]?.totalLikes || 0,
-    commentCount: commentCountResult[0]?.totalComments || 0,
+    postCount,
+    reactionCount,
+    commentCount,
   };
 };

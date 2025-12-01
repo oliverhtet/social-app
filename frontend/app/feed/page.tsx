@@ -15,7 +15,7 @@ export default function FeedPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
-
+console.log(posts);
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/")

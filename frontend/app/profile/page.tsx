@@ -1,51 +1,48 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { formatDistanceToNow } from "date-fns"
-import { useAuth } from "@/context/auth-context"
-import { getPostsByUserId, getUserStats, initializeStorage } from "@/lib/data-store"
-import type { Post } from "@/lib/types"
-import { Navbar } from "@/components/navbar"
-import { PostCard } from "@/components/post-card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Calendar, FileText, Heart, MessageCircle } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+import { useAuth } from "@/context/auth-context";
+import { useMyPosts } from "@/hooks/usePosts";
+import { PostCard } from "@/components/post-card";
+import { Navbar } from "@/components/navbar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, Calendar, FileText, Heart, MessageCircle } from "lucide-react";
 
 export default function ProfilePage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAuth()
-  const [posts, setPosts] = useState<Post[]>([])
-  const [stats, setStats] = useState({ postsCount: 0, likesReceived: 0, commentsCount: 0 })
-  const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { data: posts = [], isLoading: isLoadingPosts } = useMyPosts();
+  const [stats, setStats] = useState({ postsCount: 0, likesReceived: 0, commentsCount: 0 });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/")
+      router.push("/");
     }
-  }, [isLoading, isAuthenticated, router])
-
-  const loadData = () => {
-    if (!user) return
-    initializeStorage()
-    const userPosts = getPostsByUserId(user.id)
-    setPosts(userPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
-    setStats(getUserStats(user.id))
-    setIsLoadingPosts(false)
-  }
+  }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      loadData()
+    if (user) {
+      const sortedPosts = [...posts].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setStats({
+        postsCount: user.postCount ?? sortedPosts.length,
+        likesReceived: user.reactionCount ?? 0,
+        commentsCount: user.commentCount ?? 0,
+      });
     }
-  }, [isAuthenticated, user])
+  }, [user, posts]);
 
+  console.log(posts);
   if (isLoading || !isAuthenticated || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   return (
@@ -101,7 +98,7 @@ export default function ProfilePage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : posts.length > 0 ? (
-              posts.map((post) => <PostCard key={post.id} post={post} onUpdate={loadData} showActions />)
+              posts.map((post) => <PostCard key={post.id} post={post} onUpdate={() => {}} showActions />)
             ) : (
               <Card className="border-0 shadow-sm">
                 <CardContent className="py-12 text-center">
@@ -115,5 +112,5 @@ export default function ProfilePage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

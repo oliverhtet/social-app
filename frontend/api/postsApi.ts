@@ -74,5 +74,5 @@ export const toggleReaction = async (
 
 export const getMyPosts = async () => {
   const response = await apiClient.get("/posts/my-posts");
-  return response.data.data;
+  return response.data.data.posts;
 }

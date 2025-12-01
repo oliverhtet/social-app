@@ -6,6 +6,9 @@ export interface User {
   avatar: string
   bio: string
   createdAt: string
+  postCount: number
+  reactionCount:number
+  commentCount:number
 }
 
 export interface Post {
