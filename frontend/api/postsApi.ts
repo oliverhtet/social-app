@@ -9,10 +9,9 @@ export const getAllPosts = async (page: number, limit: number) => {
 };
 
 export const createPost = async (createData: FormData): Promise<ApiResponse> => {
+  console.log(createData);
   try {
-    await apiClient.post("/posts", createData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    await apiClient.post("/posts", createData);
     return { success: true, message: "Post created successfully!" };
   } catch (error) {
     console.error(error);
