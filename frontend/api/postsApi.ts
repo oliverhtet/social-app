@@ -4,8 +4,8 @@ import type { ApiResponse } from "./authApi";
 
 export const getAllPosts = async (page: number, limit: number) => {
   const response = await apiClient.get(`/posts?page=${page}&limit=${limit}`);
-  console.log("API response for getAllPosts:", response);
-  return response.data;
+  console.log("API response for getAllPosts:", response.data.data);
+  return response.data.data.posts;
 };
 
 export const createPost = async (createData: FormData): Promise<ApiResponse> => {

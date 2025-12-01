@@ -45,6 +45,7 @@ export const getAllPosts = async (page: number, limit: number) => {
   const skip = (page - 1) * limit;
   const posts = await Post.find().populate({ path: "user", select: "name" }).sort({ createdAt: -1 }).skip(skip).limit(limit);
   const total = await Post.countDocuments();
+  
   const postsWithCounts = posts.map(post => ({
     id: post._id,
     title: post.title,
@@ -53,7 +54,9 @@ export const getAllPosts = async (page: number, limit: number) => {
     created_at: post.createdAt,
     author: { id: post.user?._id, name: (post.user as any)?.name },
     reaction_count: post.likes?.length,
-    comment_count: post.comments?.length
+    comment_count: post.comments?.length,
+    comments: post.comments
+
   }));
   const pagination = getPagination(page, limit, total);
   return { posts: postsWithCounts, pagination };
