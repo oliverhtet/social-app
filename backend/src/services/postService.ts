@@ -67,9 +67,8 @@ export const getAllPosts = async (page: number, limit: number) => {
 export const addComment = async (postId: string, userId: string, content: string) => {
   const post = await Post.findById(postId);
   if (!post) throw new Error("Post not found");
-  const mongoose = require("mongoose");
   const comment = {
-    user: mongoose.Types.ObjectId(userId),
+    user: new mongoose.Types.ObjectId(userId),
     content,
     createdAt: new Date()
   };

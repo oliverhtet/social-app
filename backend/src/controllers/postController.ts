@@ -70,22 +70,28 @@ export const getAllPosts = async (req: Request, res: Response) => {
 };
 
 // Add Comment
-export const addComment = async (req: Request, res: Response) => {
+export const addComment = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
+    const userId = req.userId;
     if (!id) {
       return errorResponse(res, "Post id is required", 400);
     }
     if (!content) {
       return errorResponse(res, "Content is required", 400);
     }
-    const comment = await addCommentService(id, (req as any).userId, content);
+    if (!userId){
+      return errorResponse(res,'User Not Found');
+    }
+    const comment = await addCommentService(id, userId, content);
      return successResponse(res, "Comment added successfully", comment, 201);
   } catch (error) {
+    console.log(error);
     if ((error as Error).message === "Post not found") {
       return errorResponse(res, (error as Error).message, 404);
     } else {
+
       return errorResponse(res, "Server error");
     }
   }
