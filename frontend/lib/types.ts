@@ -12,6 +12,11 @@ export interface User {
 }
 
 export interface Post {
+  _id: Key | null | undefined
+  comment_count: ReactNode
+  reaction_count: ReactNode
+  created_at: string | number | Date
+  author: any
   id: string
   userId: string
   content: string
@@ -21,6 +26,7 @@ export interface Post {
 }
 
 export interface Comment {
+  _id: Key | null | undefined
   id: string
   userId: string
   postId: string

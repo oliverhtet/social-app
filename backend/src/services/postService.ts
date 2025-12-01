@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/Post";
 import User from "../models/User";
 import { getPagination } from "../utils/pagination";
@@ -55,7 +56,8 @@ export const getAllPosts = async (page: number, limit: number) => {
     author: { id: post.user?._id, name: (post.user as any)?.name },
     reaction_count: post.likes?.length,
     comment_count: post.comments?.length,
-    comments: post.comments
+    comments: post.comments,
+    likes:post.likes
 
   }));
   const pagination = getPagination(page, limit, total);
@@ -76,21 +78,29 @@ export const addComment = async (postId: string, userId: string, content: string
   return comment;
 };
 
-export const toggleReaction = async (postId: string, userId: string, type: string) => {
+export const toggleReaction = async (postId: string, userId: string, type = "like") => {
   if (type !== "like") throw new Error("Invalid reaction type");
+
   const post = await Post.findById(postId);
   if (!post) throw new Error("Post not found");
-  const mongoose = require("mongoose");
-  const userObjectId = mongoose.Types.ObjectId(userId);
-  const userIndex = post.likes.indexOf(userObjectId);
-  let action;
-  if (userIndex > -1) {
-    post.likes.splice(userIndex, 1);
+
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const alreadyLiked = post.likes.some((id) => id.toString() === userObjectId.toString());
+
+  let action: "liked" | "unliked";
+  if (alreadyLiked) {
+    post.likes = post.likes.filter((id) => id.toString() !== userObjectId.toString());
     action = "unliked";
   } else {
-    post.likes.push(require("mongoose").Types.ObjectId(userId));
+    post.likes.push(userObjectId);
     action = "liked";
   }
+
   await post.save();
-  return { action, reaction_count: post.likes.length };
+
+  return {
+    postId,
+    action,
+    reaction_count: post.likes.length
+  };
 };

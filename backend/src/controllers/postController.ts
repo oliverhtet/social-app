@@ -90,19 +90,20 @@ export const addComment = async (req: Request, res: Response) => {
 };
 
 // Toggle Reaction (Like/Unlike)
-export const toggleReaction = async (req: Request, res: Response) => {
+export const toggleReaction = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // post id
     const { type } = req.body;
-    if (!id || typeof id !== "string") {
-      return errorResponse(res, "Post id is required", 400);
+    const userId = req.userId; // set by auth middleware
+
+    if (!userId) return errorResponse(res, "Unauthorized", 401);
+     if (!id) {
+      return errorResponse(res, "Post ID is required", 400);
     }
-    if (typeof type !== "string" || type !== "like") {
-      return errorResponse(res, "Invalid reaction type", 400);
-    }
-    const data = await toggleReactionsService(id, (req as any).userId, type);
+    const data = await toggleReactionsService(id , userId, type);
     return successResponse(res, "Reaction updated successfully", data);
   } catch (error) {
+    console.log(error);
     if ((error as Error).message === "Post not found") {
      return errorResponse(res, (error as Error).message, 404);
     } else if ((error as Error).message === "Invalid reaction type") {

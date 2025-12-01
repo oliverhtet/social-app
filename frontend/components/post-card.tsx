@@ -4,7 +4,7 @@ import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { useAuth } from "@/context/auth-context"
 import type { Post } from "@/lib/types"
-import { toggleLike, addComment, getUserById, deletePost, updatePost } from "@/lib/data-store"
+import { toggleLike, getUserById, deletePost, updatePost } from "@/lib/data-store"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,6 +12,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Heart, MessageCircle, MoreHorizontal, Edit2, Trash2, Send } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAddComment,useToggleReaction } from "@/hooks/usePosts";
 
 interface PostCardProps {
   post: Post
@@ -27,20 +28,27 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
   const [editContent, setEditContent] = useState(post.content)
 
   const postAuthor = getUserById(post.userId)
-  const isLiked = user ? post.likes.includes(user.id) : false
+  const isLiked = user ? post.likes?.includes(user.id) : false
   const isOwner = user?.id === post.userId
+
+   const addCommentMutation = useAddComment()
+  const toggleReactionMutation = useToggleReaction()
 
   const handleLike = () => {
     if (!user) return
-    toggleLike(post.id, user.id)
-    onUpdate()
+    toggleReactionMutation.mutate(
+      { postId: post.id, type: "like" },
+      { onSuccess: () => onUpdate() }
+    )
   }
 
   const handleComment = () => {
     if (!user || !commentText.trim()) return
-    addComment(post.id, user.id, commentText.trim())
+    addCommentMutation.mutate(
+      { postId: post.id, content: commentText.trim() },
+      { onSuccess: () => onUpdate() }
+    )
     setCommentText("")
-    onUpdate()
   }
 
   const handleDelete = () => {
@@ -66,11 +74,11 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{postAuthor?.name}</span>
+                <span className="font-semibold">{post.author?.name}</span>
                 <span className="text-sm text-muted-foreground">@{postAuthor?.username}</span>
                 <span className="text-sm text-muted-foreground">·</span>
                 <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                 </span>
               </div>
               {isOwner && showActions && (
@@ -134,11 +142,11 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
             onClick={handleLike}
           >
             <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-            <span>{post.likes.length}</span>
+            <span>{post.reaction_count}</span>
           </Button>
           <Button variant="ghost" size="sm" className="gap-2" onClick={() => setShowComments(!showComments)}>
             <MessageCircle className="h-4 w-4" />
-            <span>{post.comments.length}</span>
+            <span>{post.comment_count}</span>
           </Button>
         </div>
       </CardFooter>
@@ -169,7 +177,7 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
             {post.comments.map((comment) => {
               const commentAuthor = getUserById(comment.userId)
               return (
-                <div key={comment.id} className="flex gap-2">
+                <div key={comment._id} className="flex gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={commentAuthor?.avatar || "/placeholder.svg"} alt={commentAuthor?.name} />
                     <AvatarFallback>{commentAuthor?.name?.charAt(0).toUpperCase()}</AvatarFallback>

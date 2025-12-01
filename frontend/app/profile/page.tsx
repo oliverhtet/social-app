@@ -10,6 +10,7 @@ import { Navbar } from "@/components/navbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Calendar, FileText, Heart, MessageCircle } from "lucide-react";
+import { Post } from "@/lib/types";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function ProfilePage() {
               </Avatar>
               <div className="flex-1 text-center sm:text-left">
                 <h1 className="text-2xl font-bold">{user.name}</h1>
-                <p className="text-muted-foreground">@{user.username}</p>
+                <p className="text-muted-foreground">{user.email}</p>
                 {user.bio && <p className="mt-2 text-foreground">{user.bio}</p>}
                 <div className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground sm:justify-start">
                   <Calendar className="h-4 w-4" />
@@ -98,7 +99,7 @@ export default function ProfilePage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : posts.length > 0 ? (
-              posts.map((post) => <PostCard key={post.id} post={post} onUpdate={() => {}} showActions />)
+              posts.map((post: Post) => <PostCard key={post._id} post={post} onUpdate={() => {}} showActions />)
             ) : (
               <Card className="border-0 shadow-sm">
                 <CardContent className="py-12 text-center">
