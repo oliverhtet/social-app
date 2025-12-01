@@ -75,10 +75,10 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{post.author?.name}</span>
-                <span className="text-sm text-muted-foreground">@{postAuthor?.username}</span>
+                <span className="text-sm text-muted-foreground">@{postAuthor?.email}</span>
                 <span className="text-sm text-muted-foreground">·</span>
                 <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                 </span>
               </div>
               {isOwner && showActions && (
