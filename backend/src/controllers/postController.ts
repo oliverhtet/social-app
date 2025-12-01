@@ -5,13 +5,15 @@ import Post from "../models/Post";
 import { AuthenticatedRequest } from "../types";
 
 // Create Post
-export const createPost = async (req: AuthenticatedRequest, res: Response) => {
+export const createPost = async (cusreq: AuthenticatedRequest, res: Response) => {
+  
   try {
-    const { content } = req.body;
-    const userId = req?.userId as string;
+    const { content } = cusreq.body;
+    const userId = cusreq?.userId as string;
     const post = await createPostService(userId , content);
     return successResponse(res, "Post created successfully", post, 201);
   } catch (error) {
+    console.log(error);
     return errorResponse(res, "Server error");
   }
 };

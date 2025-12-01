@@ -9,7 +9,7 @@ export const createPost = async (
 ) => {
   const postData = {
     user: userId,
-    content: content.trim(),
+    content: content,
    
   };
 
@@ -52,7 +52,7 @@ export const getAllPosts = async (page: number, limit: number) => {
     title: post.title,
     content: post.content,
     image: post.image,
-    created_at: post.createdAt,
+    createdAt: post.createdAt,
     author: { id: post.user?._id, name: (post.user as any)?.name },
     reaction_count: post.likes?.length,
     comment_count: post.comments?.length,
