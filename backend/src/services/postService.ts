@@ -64,16 +64,23 @@ export const getAllPosts = async (page: number, limit: number) => {
   return { posts: postsWithCounts, pagination };
 };
 
-export const addComment = async (postId: string, userId: string, content: string) => {
+export const addComment = async (postId: string | undefined, userId: string | undefined, content: string) => {
+  if (!postId) throw new Error("Post ID is required");
+  if (!userId) throw new Error("User ID is required");
+  if (!content) throw new Error("Comment content is required");
+
   const post = await Post.findById(postId);
   if (!post) throw new Error("Post not found");
+
   const comment = {
     user: new mongoose.Types.ObjectId(userId),
     content,
-    createdAt: new Date()
+    createdAt: new Date(),
   };
+
   post.comments.push(comment);
   await post.save();
+
   return comment;
 };
 

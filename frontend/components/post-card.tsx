@@ -26,7 +26,7 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
   const [commentText, setCommentText] = useState("")
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(post.content)
-
+ console.log(post);
   const postAuthor = getUserById(post.userId)
   const isLiked = user ? post.likes?.includes(user.id) : false
   const isOwner = user?.id === post.userId
@@ -142,11 +142,11 @@ export function PostCard({ post, onUpdate, showActions = true }: PostCardProps) 
             onClick={handleLike}
           >
             <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-            <span>{post.reaction_count}</span>
+            <span>{post.likes.length || 0}</span>
           </Button>
           <Button variant="ghost" size="sm" className="gap-2" onClick={() => setShowComments(!showComments)}>
             <MessageCircle className="h-4 w-4" />
-            <span>{post.comment_count}</span>
+            <span>{post.comments.length || 0}</span>
           </Button>
         </div>
       </CardFooter>

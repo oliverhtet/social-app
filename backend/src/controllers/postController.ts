@@ -3,6 +3,7 @@ import { createPost as createPostService, editPost as editPostService, getMyPost
 import { successResponse, errorResponse } from "../utils/response";
 import Post from "../models/Post";
 import { AuthenticatedRequest } from "../types";
+import { ObjectId } from "mongoose";
 
 // Create Post
 export const createPost = async (cusreq: AuthenticatedRequest, res: Response) => {
@@ -72,10 +73,10 @@ export const getAllPosts = async (req: Request, res: Response) => {
 // Add Comment
 export const addComment = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const postId = req.params.id;
     const { content } = req.body;
     const userId = req.userId;
-    if (!id) {
+    if (!postId) {
       return errorResponse(res, "Post id is required", 400);
     }
     if (!content) {
@@ -84,7 +85,7 @@ export const addComment = async (req: AuthenticatedRequest, res: Response) => {
     if (!userId){
       return errorResponse(res,'User Not Found');
     }
-    const comment = await addCommentService(id, userId, content);
+    const comment = await addCommentService(postId, userId, content);
      return successResponse(res, "Comment added successfully", comment, 201);
   } catch (error) {
     console.log(error);

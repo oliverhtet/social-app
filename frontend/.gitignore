@@ -10,7 +10,9 @@ pnpm-debug.log*
 **/backend/node_modules/
 **/frontend/.next/
 **/frontend/.next/dev
-
+.next/
+out/
+build/
 **/frontend/out/
 **/frontend/build/
 **/backend/dist/
